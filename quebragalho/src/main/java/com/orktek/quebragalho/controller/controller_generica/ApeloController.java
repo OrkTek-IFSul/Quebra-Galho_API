@@ -33,19 +33,19 @@ public class ApeloController {
      * POST /api/apelos/{denunciaId}
      */
     // @Operation(summary = "Cria um novo apelo", description = "Cria um apelo para uma denúncia específica")
-    @ApiResponses({
-        @ApiResponse(responseCode = "201", description = "Apelo criado com sucesso"),
-        @ApiResponse(responseCode = "400", description = "Dados inválidos"),
-        @ApiResponse(responseCode = "404", description = "Denúncia não encontrada")
-    })
-    @PostMapping("/{denunciaId}")
-    public ResponseEntity<Apelo> criarApelo(
-            @Parameter(description = "ID da denúncia para a qual o apelo será criado", required = true)
-            @PathVariable Long denunciaId,
-            @RequestBody Apelo apelo) {
-        Apelo novoApelo = apeloService.criarApelo(apelo, denunciaId);
-        return ResponseEntity.status(201).body(novoApelo); // 201 Created
-    }
+    // @ApiResponses({
+    //     @ApiResponse(responseCode = "201", description = "Apelo criado com sucesso"),
+    //     @ApiResponse(responseCode = "400", description = "Dados inválidos"),
+    //     @ApiResponse(responseCode = "404", description = "Denúncia não encontrada")
+    // })
+    // @PostMapping("/{denunciaId}")
+    // public ResponseEntity<Apelo> criarApelo(
+    //         @Parameter(description = "ID da denúncia para a qual o apelo será criado", required = true)
+    //         @PathVariable Long denunciaId,
+    //         @RequestBody Apelo apelo) {
+    //     Apelo novoApelo = apeloService.criarApelo(apelo, denunciaId);
+    //     return ResponseEntity.status(201).body(novoApelo); // 201 Created
+    // }
 
     // /**
     //  * Lista todos os apelos pendentes

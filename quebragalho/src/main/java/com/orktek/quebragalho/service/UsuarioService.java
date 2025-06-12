@@ -122,9 +122,9 @@ public class UsuarioService {
 
         // // Só atualiza a senha se foi fornecida no DTO
         // if (usuarioDTO.getSenha() != null && !usuarioDTO.getSenha().isBlank()) {
-        //     usuario.setSenha(passwordEncoder.encode(usuarioDTO.getSenha()));
+        // usuario.setSenha(passwordEncoder.encode(usuarioDTO.getSenha()));
         // }
-        
+
         // Salva o usuário no banco de dados
         usuarioRepository.save(usuario);
         // Cria um novo DTO com os dados do usuário
@@ -136,6 +136,30 @@ public class UsuarioService {
         retornoUsuarioDTO.setDocumento(usuario.getDocumento());
         // Retorna o DTO com os dados do usuário
         return retornoUsuarioDTO;
+    }
+
+    public String tornarModerador(Long idUsuario) {
+        Usuario usuarioAtulizar = usuarioRepository.findById(idUsuario)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
+
+        usuarioAtulizar.setIsModerador(true);
+        usuarioRepository.save(usuarioAtulizar);
+
+        return "Usuário " + usuarioAtulizar.getNome() +" atualizado para moderador com sucesso";
+    }
+
+    public String removerModerador(Long idUsuario) {
+        Usuario usuarioAtulizar = usuarioRepository.findById(idUsuario)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
+
+        if (!usuarioAtulizar.getIsModerador()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Usuário não é moderador");
+        }
+
+        usuarioAtulizar.setIsModerador(false);
+        usuarioRepository.save(usuarioAtulizar);
+
+        return "Usuário " + usuarioAtulizar.getNome() + " não é mais moderador";
     }
 
     /**
@@ -163,35 +187,37 @@ public class UsuarioService {
     }
 
     // /**
-    //  * Atualiza os dados de um usuário existente
-    //  * 
-    //  * @param id                ID do usuário a ser atualizado
-    //  * @param usuarioAtualizado Objeto com os novos dados
-    //  * @return Usuario atualizado
-    //  * @throws ResponseStatusException se usuário não for encontrado ou email já
-    //  *                                 estiver em uso
-    //  */
+    // * Atualiza os dados de um usuário existente
+    // *
+    // * @param id ID do usuário a ser atualizado
+    // * @param usuarioAtualizado Objeto com os novos dados
+    // * @return Usuario atualizado
+    // * @throws ResponseStatusException se usuário não for encontrado ou email já
+    // * estiver em uso
+    // */
     // @Transactional
     // public Usuario atualizarUsuario(Long id, Usuario usuarioAtualizado) {
-    //     return usuarioRepository.findById(id)
-    //             .map(usuario -> {
-    //                 // Verifica se está tentando mudar o email
-    //                 if (!usuario.getEmail().equals(usuarioAtualizado.getEmail())) {
-    //                     // Verifica se novo email já está em uso
-    //                     if (usuarioRepository.existsByEmail(usuarioAtualizado.getEmail())) {
-    //                         throw new ResponseStatusException(HttpStatus.CONFLICT, "E-mail já está em uso");
-    //                     }
-    //                 }
+    // return usuarioRepository.findById(id)
+    // .map(usuario -> {
+    // // Verifica se está tentando mudar o email
+    // if (!usuario.getEmail().equals(usuarioAtualizado.getEmail())) {
+    // // Verifica se novo email já está em uso
+    // if (usuarioRepository.existsByEmail(usuarioAtualizado.getEmail())) {
+    // throw new ResponseStatusException(HttpStatus.CONFLICT, "E-mail já está em
+    // uso");
+    // }
+    // }
 
-    //                 // Atualiza apenas os campos permitidos
-    //                 usuario.setNome(usuarioAtualizado.getNome());
-    //                 usuario.setEmail(usuarioAtualizado.getEmail());
-    //                 usuario.setTelefone(usuarioAtualizado.getTelefone());
-    //                 usuario.setImgPerfil(usuarioAtualizado.getImgPerfil());
+    // // Atualiza apenas os campos permitidos
+    // usuario.setNome(usuarioAtualizado.getNome());
+    // usuario.setEmail(usuarioAtualizado.getEmail());
+    // usuario.setTelefone(usuarioAtualizado.getTelefone());
+    // usuario.setImgPerfil(usuarioAtualizado.getImgPerfil());
 
-    //                 return usuarioRepository.save(usuario);
-    //             })
-    //             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
+    // return usuarioRepository.save(usuario);
+    // })
+    // .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário
+    // não encontrado"));
     // }
 
     /**
@@ -222,6 +248,19 @@ public class UsuarioService {
     public void adicionarStrike(Long usuarioId) {
         usuarioRepository.findById(usuarioId).ifPresent(usuario -> {
             usuario.setNumStrike(usuario.getNumStrike() + 1);
+            usuarioRepository.save(usuario);
+        });
+    }
+
+
+    /**
+     * remove um strike (marca de advertência) ao usuário
+     * 
+     * @param usuarioId ID do usuário
+     */
+    public void removerStrike(Long usuarioId) {
+        usuarioRepository.findById(usuarioId).ifPresent(usuario -> {
+            usuario.setNumStrike(usuario.getNumStrike() - 1);
             usuarioRepository.save(usuario);
         });
     }

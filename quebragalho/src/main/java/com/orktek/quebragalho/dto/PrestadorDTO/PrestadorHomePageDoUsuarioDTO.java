@@ -39,7 +39,7 @@ public class PrestadorHomePageDoUsuarioDTO {
         dto.setNome(prestador.getUsuario().getNome());
         dto.setImagemPerfil("api/usuarios/" + prestador.getUsuario().getId() + "/imagem");
         if (prestador.getTags() == null || prestador.getTags().isEmpty()) {
-            dto.setTags(null);
+            dto.setTags(java.util.Collections.emptyList());
         } else {
             dto.setTags(prestador.getTags().stream().map(TagDTO::fromEntity).toList());
         }
