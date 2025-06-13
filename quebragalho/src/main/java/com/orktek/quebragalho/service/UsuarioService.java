@@ -35,6 +35,16 @@ public class UsuarioService {
     @Autowired
     private FileStorageService fileStorageService;// Para manipulação de arquivos
 
+    @Transactional
+    public boolean desativarUsuario(Long idUsuario) {
+        Usuario usuario = usuarioRepository.findById(idUsuario)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
+
+        usuario.setIsAtivo(false);
+        usuarioRepository.save(usuario);
+        return usuario.getIsAtivo();
+    }
+
     // TODO UTILIZAR NA CONTROLLER DE CRIAÇÃO DE USUARIO E ALTERAR O RETORNO PARA
     // GETUSUARIODTO
     /**
@@ -70,7 +80,7 @@ public class UsuarioService {
 
         // Criptografa a senha antes de salvar
         usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
-
+        usuario.setIsAtivo(true);
         // Salva o usuário no banco de dados
         usuarioRepository.save(usuario);
         // Cria um novo DTO com os dados do usuário
@@ -145,7 +155,7 @@ public class UsuarioService {
         usuarioAtulizar.setIsModerador(true);
         usuarioRepository.save(usuarioAtulizar);
 
-        return "Usuário " + usuarioAtulizar.getNome() +" atualizado para moderador com sucesso";
+        return "Usuário " + usuarioAtulizar.getNome() + " atualizado para moderador com sucesso";
     }
 
     public String removerModerador(Long idUsuario) {
@@ -251,7 +261,6 @@ public class UsuarioService {
             usuarioRepository.save(usuario);
         });
     }
-
 
     /**
      * remove um strike (marca de advertência) ao usuário

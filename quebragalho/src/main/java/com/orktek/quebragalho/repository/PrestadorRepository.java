@@ -17,6 +17,8 @@ import org.springframework.stereotype.Repository;
 public interface PrestadorRepository extends JpaRepository<Prestador, Long> {
         boolean existsByUsuario(Usuario usuario);
 
+        List<Prestador> findByAceitoIsNull();
+
         Optional<Prestador> findByUsuarioId(Long usuarioId);
 
         @Query("SELECT p FROM Prestador p JOIN p.usuario u LEFT JOIN p.tags t " +

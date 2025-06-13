@@ -66,6 +66,7 @@ public class PrestadorService {
         prestador.setDocumentoPath("");
         prestador.setDataHoraInicio(LocalDateTime.now());
         prestador.setDataHoraFim(LocalDateTime.now());
+        prestador.setAceito(null);
         // Salva o prestador no banco de dados
         prestadorRepository.save(prestador);
 
@@ -93,6 +94,16 @@ public class PrestadorService {
      */
     public List<Prestador> listarTodos() {
         return prestadorRepository.findAll();
+    }
+
+
+    /**
+     * Lista todos os prestadores nao aceitos
+     * 
+     * @return Lista de Prestador
+     */
+    public List<Prestador> listarTodosNaoAceitos() {
+        return prestadorRepository.findByAceitoIsNull();
     }
 
     /**

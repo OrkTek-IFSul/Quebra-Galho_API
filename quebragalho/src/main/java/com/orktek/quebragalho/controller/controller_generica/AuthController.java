@@ -46,6 +46,11 @@ public class AuthController {
             response.put("id_prestador", usuario.getPrestador().getId());
         }
 
+        // Se usuario for inativo recusa o login
+        if(usuario.getIsAtivo() == false){
+            return ResponseEntity.ok("Usuario Desativado");
+        }
+        
         // Retorna o token JWT gerado e o ID como resposta para o cliente
         return ResponseEntity.ok((response));
     }

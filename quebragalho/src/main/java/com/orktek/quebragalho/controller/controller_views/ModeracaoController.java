@@ -1,13 +1,19 @@
 package com.orktek.quebragalho.controller.controller_views;
 
+import com.orktek.quebragalho.dto.PrestadorDTO.AnalisePrestadorDTO;
 import com.orktek.quebragalho.model.Apelo;
 import com.orktek.quebragalho.model.Denuncia;
 import com.orktek.quebragalho.model.Usuario;
 import com.orktek.quebragalho.service.ApeloService;
 import com.orktek.quebragalho.service.DenunciaService;
+import com.orktek.quebragalho.service.PrestadorService;
 import com.orktek.quebragalho.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +31,9 @@ public class ModeracaoController {
 
     @Autowired
     private DenunciaService denunciaService;
+
+    @Autowired
+    private PrestadorService prestadorService;
 
     @Autowired
     private ApeloService apeloService;
@@ -62,6 +71,11 @@ public class ModeracaoController {
 
         // Adiciona um strike ao usuário denunciado
         usuarioService.adicionarStrike(usuario.getId());
+
+        // Se usuario possuir 3 strikes é banido c:
+        if (usuario.getIsAtivo() == true && usuario.getNumStrike() >= 3) {
+            usuarioService.desativarUsuario(idDenuncia);
+        }
 
         return ResponseEntity.ok("Denuncia aceita com sucesso");
     }
@@ -102,4 +116,16 @@ public class ModeracaoController {
 
         return ResponseEntity.ok("Apelo recusado com sucesso");
     }
+
+    @GetMapping("analisarPrestador")
+    @Operation(summary = "Busca lista de prestadores não analisados", description = "Busca lista de prestadores não analisados")
+    public ResponseEntity<List<AnalisePrestadorDTO>> listarPrestadores() {
+
+        List<AnalisePrestadorDTO> prestadoresNaoAceitos = prestadorService.listarTodosNaoAceitos().stream()
+                .map(AnalisePrestadorDTO::fromEntity).collect(Collectors.toList());
+
+        return ResponseEntity.ok(prestadoresNaoAceitos);
+    }
+
+    //TODO IMPLEMENTAR ACEITAR OU RECUSAR PRESTADOR
 }

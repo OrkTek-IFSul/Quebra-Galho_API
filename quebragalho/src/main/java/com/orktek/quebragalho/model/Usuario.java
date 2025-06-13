@@ -70,6 +70,10 @@ public class Usuario implements UserDetails {
     @Schema(description = "Indica se o usuário é moderador", example = "false")
     private Boolean isModerador;
 
+    @Column(name = "is_ativo", nullable = false)
+    @Schema(description = "Indica se o usuário está ativo ou não", example = "true")
+    private Boolean isAtivo;
+
     @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL)
     @Schema(description = "Prestador associado ao usuário")
     private Prestador prestador;
