@@ -86,6 +86,25 @@ public class PrestadorService {
         // Retorna o DTO com os dados do prestador
         return RetornoPrestadorDTO;
     }
+    /**
+     * Atualiza o status de aceitação do prestador
+     * 
+     * @param idPrestador ID do prestador
+     * @param aceito      Novo status de aceitação
+     * @return Lista de prestadores com o status atualizado
+     * @throws ResponseStatusException se prestador não for encontrado
+     */
+    public String statusAceito(Long idPrestador, Boolean aceito) {
+        Prestador prestador = prestadorRepository.findById(idPrestador)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Prestador não encontrado"));
+        prestador.setAceito(aceito);
+        prestadorRepository.save(prestador);
+        if (aceito) {
+            return "Prestador aceito com sucesso";
+        } else {
+            return "Prestador recusado com sucesso";
+        }
+    }
 
     /**
      * Lista todos os prestadores cadastrados
@@ -95,7 +114,6 @@ public class PrestadorService {
     public List<Prestador> listarTodos() {
         return prestadorRepository.findAll();
     }
-
 
     /**
      * Lista todos os prestadores nao aceitos
@@ -168,9 +186,9 @@ public class PrestadorService {
     public void deletarPrestador(Long id) {
         prestadorRepository.deleteById(id);
     }
-
     public double mediaNotaPrestador(Long prestadorId) {
-        return avaliacaoRepository.calcularMediaAvaliacoesPorPrestador(prestadorId);
+        Double media = avaliacaoRepository.calcularMediaAvaliacoesPorPrestador(prestadorId);
+        return media != null ? media : 0.0;
     }
 
     /**

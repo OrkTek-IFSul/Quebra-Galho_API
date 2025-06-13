@@ -3,6 +3,7 @@ package com.orktek.quebragalho.controller.controller_views;
 import com.orktek.quebragalho.dto.PrestadorDTO.AnalisePrestadorDTO;
 import com.orktek.quebragalho.model.Apelo;
 import com.orktek.quebragalho.model.Denuncia;
+import com.orktek.quebragalho.model.Prestador;
 import com.orktek.quebragalho.model.Usuario;
 import com.orktek.quebragalho.service.ApeloService;
 import com.orktek.quebragalho.service.DenunciaService;
@@ -127,5 +128,22 @@ public class ModeracaoController {
         return ResponseEntity.ok(prestadoresNaoAceitos);
     }
 
-    //TODO IMPLEMENTAR ACEITAR OU RECUSAR PRESTADOR
+    @PutMapping("analisarPrestador/recusarPrestador/{idPrestador}")
+    @Operation(summary = "Recusar um prestador", description = "Recusa o cadastro de um prestador")
+    public ResponseEntity<String> RecusarPrestador(@PathVariable Long idPrestador) {
+
+        // Recusa o prestador
+        prestadorService.statusAceito(idPrestador, false);
+        return ResponseEntity.ok("Prestador recusado com sucesso");
+
+    }
+
+    @PutMapping("analisarPrestador/aceitarPrestador/{idPrestador}")
+    @Operation(summary = "Aceitar um prestador", description = "Aceita o cadastro de um prestador")
+    public ResponseEntity<String> AceitarPrestador(@PathVariable Long idPrestador) {
+
+        // Aceita o prestador
+        prestadorService.statusAceito(idPrestador, true);
+        return ResponseEntity.ok("Prestador aceito com sucesso");
+    }
 }
