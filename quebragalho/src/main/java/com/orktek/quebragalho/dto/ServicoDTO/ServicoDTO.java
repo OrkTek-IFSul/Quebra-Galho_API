@@ -21,6 +21,9 @@ public class ServicoDTO {
     @Schema(description = "Preço do serviço", example = "50.0")
     private Double preco;
 
+    @Schema(description = "Duração do serviço em minutos", example = "90")
+    private int duracaoMinutos;
+
     @Schema(description = "Prestador responsável pelo serviço")
     private Long idPrestador;
 
@@ -32,6 +35,7 @@ public class ServicoDTO {
         dto.setNome(servico.getNome());
         dto.setDescricao(servico.getDescricao());
         dto.setPreco(servico.getPreco());
+        dto.setDuracaoMinutos(servico.getDuracaoMinutos());
         dto.setIdPrestador(servico.getPrestador().getId());
         dto.setTags(servico.getTags().stream().map(TagDTO::fromEntity).toList());
         return dto;

@@ -33,6 +33,10 @@ public class Servico {
     @Column(nullable = false)
     @Schema(description = "Serviço ativo ou não", example = "true")
     private Boolean ativo;
+    
+    @Column(name = "duracao_minutos",nullable = false)
+    @Schema(description = "Duracao do serviço em minutos", example = "90")
+    private int duracaoMinutos;
 
     @ManyToOne
     @JoinColumn(name = "id_prestador_fk", nullable = false)

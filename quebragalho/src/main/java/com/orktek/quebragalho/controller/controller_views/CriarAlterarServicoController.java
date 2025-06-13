@@ -111,6 +111,7 @@ public class CriarAlterarServicoController {
                         servicoExistente.setNome(servicoDTO.getNome());
                         servicoExistente.setDescricao(servicoDTO.getDescricao());
                         servicoExistente.setPreco(servicoDTO.getPreco());
+                        servicoExistente.setDuracaoMinutos(servicoDTO.getDuracaoMinutos());
 
                         // Adiciona as tags do DTO em uma lista para o serviço
                         List<Tags> tagsAtualizadas = new ArrayList<>();
