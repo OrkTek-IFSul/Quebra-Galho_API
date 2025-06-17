@@ -3,12 +3,13 @@ package com.orktek.quebragalho.dto.AvaliacaoDTO;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
+import com.orktek.quebragalho.dto.RespostaDTO.CarregarRespostaDTO;
 import com.orktek.quebragalho.model.Avaliacao;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 @Data
-public class CarregarAvaliacaoDTO {
+public class CarregarAvaliacaoDetalhesDTO {
 
     @Schema(description = "Identificador único da avaliação", example = "1")
     private Long idAvaliacao;
@@ -31,9 +32,11 @@ public class CarregarAvaliacaoDTO {
     @Schema(description = "Data da avaliação", example = "2023-10-01")
     private String data;
 
-    
-    public static CarregarAvaliacaoDTO fromEntity(Avaliacao avaliacao) {
-        CarregarAvaliacaoDTO dto = new CarregarAvaliacaoDTO();
+    @Schema(description = "Resposta associada à avaliação, se existir")
+    private CarregarRespostaDTO resposta;
+
+    public static CarregarAvaliacaoDetalhesDTO fromEntity(Avaliacao avaliacao) {
+        CarregarAvaliacaoDetalhesDTO dto = new CarregarAvaliacaoDetalhesDTO();
         dto.setIdAvaliacao(avaliacao.getId());
         dto.setNomeUsuario(avaliacao.getAgendamento().getUsuario().getNome());
         dto.setImagemPerfil("api/usuarios/" + avaliacao.getAgendamento().getUsuario().getId() + "/imagem");
@@ -41,6 +44,11 @@ public class CarregarAvaliacaoDTO {
         dto.setComentario(avaliacao.getComentario());
         dto.setNomeServico(avaliacao.getAgendamento().getServico().getNome());
         dto.setData(avaliacao.getData());
+        if (avaliacao.getResposta() != null) {
+            dto.setResposta(CarregarRespostaDTO.fromEntity(avaliacao.getResposta()));
+        } else {
+            dto.setResposta(null);
+        }
         return dto;
     }
 

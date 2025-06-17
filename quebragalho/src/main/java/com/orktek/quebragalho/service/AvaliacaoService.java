@@ -60,7 +60,7 @@ public class AvaliacaoService {
      * @return Lista de Avaliacao
      */
     public List<Avaliacao> listarPorPrestador(Long prestadorId) {
-        return avaliacaoRepository.findByAgendamentoServicoId(prestadorId);
+        return avaliacaoRepository.findByAgendamentoServicoPrestadorId(prestadorId);
     }
 
     /**

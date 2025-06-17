@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.orktek.quebragalho.dto.AvaliacaoDTO.CarregarAvaliacaoDTO;
+import com.orktek.quebragalho.dto.AvaliacaoDTO.CarregarAvaliacaoDetalhesDTO;
 import com.orktek.quebragalho.dto.AvaliacaoDTO.CriarAvaliacaoDTO;
 import com.orktek.quebragalho.dto.RespostaDTO.CarregarRespostaDTO;
 import com.orktek.quebragalho.dto.RespostaDTO.CriarRespostaDTO;
@@ -25,112 +26,134 @@ import com.orktek.quebragalho.model.Resposta;
 import com.orktek.quebragalho.service.AvaliacaoService;
 
 @RestController
-@RequestMapping("/api/avaliacoesservico")
-@Tag(name = "Tela de avaliacoes de um servico", description = "Operações relacionadas à Tela de avaliacoes de um servico")
+@RequestMapping("/api/avaliacoesprestador")
+@Tag(name = "Tela de avaliacoes dadas a um prestador", description = "Operações relacionadas à Tela de avaliacoes de um prestador")
 public class AvaliacoesServicoController {
 
-    @Autowired
-    private RespostaService respostaService;
+        @Autowired
+        private RespostaService respostaService;
 
-    @Autowired
-    private AvaliacaoService avaliacaoService;
+        @Autowired
+        private AvaliacaoService avaliacaoService;
 
-    AvaliacoesServicoController(RespostaService respostaService) {
-        this.respostaService = respostaService;
-    }
+        AvaliacoesServicoController(RespostaService respostaService) {
+                this.respostaService = respostaService;
+        }
 
-    @GetMapping("/{servicoId}")
-    @Operation(summary = "Carrega avaliacoes de um servico", description = "Carrega avaliacoes de um servico")
-    public ResponseEntity<List<CarregarAvaliacaoDTO>> ListaAvaliacoesDoServico(
-            @Parameter(description = "Id do Servico") @PathVariable Long servicoId) {
+        @GetMapping("/{idPrestador}")
+        @Operation(summary = "Carrega avaliacoes de um prestador", description = "Carrega avaliacoes de um prestador")
+        public ResponseEntity<List<CarregarAvaliacaoDTO>> ListaAvaliacoesDoPrestador(
+                        @Parameter(description = "Id do Prestador") @PathVariable Long idPrestador) {
 
-        List<CarregarAvaliacaoDTO> avaliacaoDTOs = avaliacaoService
-                .listarPorServico(servicoId)
-                .stream().map(CarregarAvaliacaoDTO::fromEntity)
-                .collect(Collectors.toList());
+                List<CarregarAvaliacaoDTO> avaliacaoDTOs = avaliacaoService
+                                .listarPorPrestador(idPrestador)
+                                .stream().map(CarregarAvaliacaoDTO::fromEntity)
+                                .collect(Collectors.toList());
+                System.out.println("Carregando avaliacoes do prestador: " + idPrestador+ " - Total: " + avaliacaoDTOs.size());
 
-        return ResponseEntity.ok(avaliacaoDTOs);
-    }
+                return ResponseEntity.ok(avaliacaoDTOs);
+        }
 
-    @PostMapping("/{avaliacaoId}")
-    @Operation(summary = "Responde uma avaliacao(SÓ O PRESTADOR PODE RESPONDER)", description = "Permite que o usuário responda uma avaliacao pelo seu ID.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Resposta criada com sucesso", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CriarAvaliacaoDTO.class))),
-            @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos"),
-            @ApiResponse(responseCode = "404", description = "Avaliacao não encontrado")
-    })
-    public ResponseEntity<CarregarRespostaDTO> criarResposta(
-            @Parameter(description = "ID da avaliacao que será respondida", required = true, example = "1") @PathVariable Long avaliacaoId,
-            @Parameter(description = "Informações da resposta", required = true) @RequestBody CriarRespostaDTO respostaDTO) {
-        Resposta resposta = new Resposta();
+        @GetMapping("/avaliacao/{idAvaliacao}")
+        @Operation(summary = "Carrega uma avaliacao e a resposta associada se existir", description = "Carrega uma avaliacao e a resposta associada se existir")
+        public ResponseEntity<CarregarAvaliacaoDetalhesDTO> ListarAvaliacao(
+                        @Parameter(description = "Id da avaliação") @PathVariable Long idAvaliacao) {
 
-        resposta.setAvaliacao(avaliacaoService.buscarPorId(avaliacaoId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND)));
+                CarregarAvaliacaoDetalhesDTO response = avaliacaoService
+                                .buscarPorId(idAvaliacao)
+                                .map(CarregarAvaliacaoDetalhesDTO::fromEntity)
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        resposta.setResposta(respostaDTO.getResposta());
-        resposta.setData(LocalDate.now());
+                return ResponseEntity.ok(response);
+        }
 
-        respostaService.criarResposta(resposta);
+        @PostMapping("/{avaliacaoId}")
+        @Operation(summary = "Responde uma avaliacao(SÓ O PRESTADOR PODE RESPONDER)", description = "Permite que o usuário responda uma avaliacao pelo seu ID.")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Resposta criada com sucesso", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CriarAvaliacaoDTO.class))),
+                        @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos"),
+                        @ApiResponse(responseCode = "404", description = "Avaliacao não encontrado")
+        })
+        public ResponseEntity<CarregarRespostaDTO> criarResposta(
+                        @Parameter(description = "ID da avaliacao que será respondida", required = true, example = "1") @PathVariable Long avaliacaoId,
+                        @Parameter(description = "Informações da resposta", required = true) @RequestBody CriarRespostaDTO respostaDTO) {
+                Resposta resposta = new Resposta();
 
-        CarregarRespostaDTO retornoRespostaDTO = CarregarRespostaDTO.fromEntity(resposta);
+                resposta.setAvaliacao(avaliacaoService.buscarPorId(avaliacaoId)
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND)));
 
-        return ResponseEntity.ok(retornoRespostaDTO);
-    }
+                resposta.setResposta(respostaDTO.getResposta());
+                resposta.setData(LocalDate.now());
 
-    
-    @PutMapping("/{avaliacaoId}")
-    @Operation(summary = "Altera uma avaliacao", description = "Permite que o usuário altere uma avaliacao pelo seu ID.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "avaliacao alterada com sucesso", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CriarAvaliacaoDTO.class))),
-            @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos"),
-            @ApiResponse(responseCode = "404", description = "avaliacao não encontrado")
-    })
-    public ResponseEntity<CarregarAvaliacaoDTO> alterarAvaliacao(
-            @Parameter(description = "ID da avaliacao que será alterada", required = true, example = "1") @PathVariable Long avaliacaoId,
-            @Parameter(description = "Novas informações da resposta", required = true) @RequestBody String novaAvaliacao) {
+                respostaService.criarResposta(resposta);
 
-        CarregarAvaliacaoDTO retornoAvaliacaoDTO = CarregarAvaliacaoDTO.fromEntity(avaliacaoService.atualizarAvaliacao(avaliacaoId, novaAvaliacao));
-        return ResponseEntity.ok(retornoAvaliacaoDTO);
-    }
+                CarregarRespostaDTO retornoRespostaDTO = CarregarRespostaDTO.fromEntity(resposta);
 
-    @PutMapping("/{respostaId}")
-    @Operation(summary = "Altera uma resposta(SÓ O PRESTADOR PODE RESPONDER)", description = "Permite que o usuário altere uma resposta pelo seu ID.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Resposta alterada com sucesso", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CriarAvaliacaoDTO.class))),
-            @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos"),
-            @ApiResponse(responseCode = "404", description = "Resposta não encontrado")
-    })
-    public ResponseEntity<CarregarRespostaDTO> alterarResposta(
-            @Parameter(description = "ID da resposta que será alterada", required = true, example = "1") @PathVariable Long respostaId,
-            @Parameter(description = "Novas informações da resposta", required = true) @RequestBody String novaResposta) {
+                return ResponseEntity.ok(retornoRespostaDTO);
+        }
 
-        CarregarRespostaDTO retornoRespostaDTO = CarregarRespostaDTO.fromEntity(respostaService.atualizarResposta(respostaId, novaResposta));
-        return ResponseEntity.ok(retornoRespostaDTO);
-    }
+        @PutMapping("/{avaliacaoId}")
+        @Operation(summary = "Altera uma avaliacao", description = "Permite que o usuário altere uma avaliacao pelo seu ID.")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "avaliacao alterada com sucesso", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CriarAvaliacaoDTO.class))),
+                        @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos"),
+                        @ApiResponse(responseCode = "404", description = "avaliacao não encontrado")
+        })
+        public ResponseEntity<CarregarAvaliacaoDTO> alterarAvaliacao(
+                        @Parameter(description = "ID da avaliacao que será alterada", required = true, example = "1") @PathVariable Long avaliacaoId,
+                        @Parameter(description = "Novas informações da resposta", required = true) @RequestBody String novaAvaliacao) {
 
-    @DeleteMapping("/{avaliacaoId}")
-    @Operation(summary = "Deleta uma avaliacao", description = "Permite que o usuário delete uma avaliacao pelo seu ID.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "avaliacao deletada com sucesso"),
-            @ApiResponse(responseCode = "404", description = "avaliacao não encontrado")
-    })
-    public ResponseEntity<Void> deletarAvaliacao(
-            @Parameter(description = "ID da avaliacao que será deletada", required = true, example = "1") @PathVariable Long avaliacaoId) {
+                CarregarAvaliacaoDTO retornoAvaliacaoDTO = CarregarAvaliacaoDTO
+                                .fromEntity(avaliacaoService.atualizarAvaliacao(avaliacaoId, novaAvaliacao));
+                return ResponseEntity.ok(retornoAvaliacaoDTO);
+        }
 
-        avaliacaoService.deletarAvaliacao(avaliacaoId);
-        return ResponseEntity.noContent().build();
-    }
+        @PutMapping("/{respostaId}")
+        @Operation(summary = "Altera uma resposta(SÓ O PRESTADOR PODE RESPONDER)", description = "Permite que o usuário altere uma resposta pelo seu ID.")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Resposta alterada com sucesso", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CriarAvaliacaoDTO.class))),
+                        @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos"),
+                        @ApiResponse(responseCode = "404", description = "Resposta não encontrado")
+        })
+        public ResponseEntity<CarregarRespostaDTO> alterarResposta(
+                        @Parameter(description = "ID da resposta que será alterada", required = true, example = "1") @PathVariable Long respostaId,
+                        @Parameter(description = "Novas informações da resposta", required = true) @RequestBody String novaResposta) {
 
-    @DeleteMapping("/{respostaId}")
-    @Operation(summary = "Deleta uma resposta(SÓ O PRESTADOR PODE RESPONDER)", description = "Permite que o usuário delete uma resposta pelo seu ID.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Resposta deletada com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Resposta não encontrado")
-    })
-    public ResponseEntity<Void> deletarResposta(
-            @Parameter(description = "ID da resposta que será deletada", required = true, example = "1") @PathVariable Long respostaId) {
+                CarregarRespostaDTO retornoRespostaDTO = CarregarRespostaDTO
+                                .fromEntity(respostaService.atualizarResposta(respostaId, novaResposta));
+                return ResponseEntity.ok(retornoRespostaDTO);
+        }
 
-        respostaService.deletarResposta(respostaId);
-        return ResponseEntity.noContent().build();
-    }
+        @DeleteMapping("/{avaliacaoId}")
+        @Operation(summary = "Deleta uma avaliacao (E deleta todas as respostas associadas)", description = "Permite que o usuário delete uma avaliacao pelo seu ID.")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "204", description = "avaliacao deletada com sucesso"),
+                        @ApiResponse(responseCode = "404", description = "avaliacao não encontrado")
+        })
+        public ResponseEntity<Void> deletarAvaliacao(
+                        @Parameter(description = "ID da avaliacao que será deletada", required = true, example = "1") @PathVariable Long avaliacaoId) {
+
+                // Apaga a resposta associada à avaliação, se existir
+                Resposta resposta = respostaService.buscarPorAvaliacao(avaliacaoId)
+                                .orElse(null);
+                if (resposta != null) {
+                        respostaService.deletarResposta(resposta.getId());
+                }
+
+                avaliacaoService.deletarAvaliacao(avaliacaoId);
+                return ResponseEntity.noContent().build();
+        }
+
+        @DeleteMapping("/{respostaId}")
+        @Operation(summary = "Deleta uma resposta(SÓ O PRESTADOR PODE RESPONDER)", description = "Permite que o usuário delete uma resposta pelo seu ID.")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "204", description = "Resposta deletada com sucesso"),
+                        @ApiResponse(responseCode = "404", description = "Resposta não encontrado")
+        })
+        public ResponseEntity<Void> deletarResposta(
+                        @Parameter(description = "ID da resposta que será deletada", required = true, example = "1") @PathVariable Long respostaId) {
+
+                respostaService.deletarResposta(respostaId);
+                return ResponseEntity.noContent().build();
+        }
 }

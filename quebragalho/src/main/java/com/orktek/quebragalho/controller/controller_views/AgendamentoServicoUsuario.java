@@ -142,4 +142,20 @@ public class AgendamentoServicoUsuario {
                 System.out.println("TESTE TESTE" + agendamentoRetornoDTO.toString());
                 return ResponseEntity.status(HttpStatus.CREATED).body(agendamentoRetornoDTO);
         }
+
+        @PutMapping("/finalizar/{agendamentoId}")
+        @Operation(summary = "Finalizar Agendamento", description = "Finaliza um agendamento")
+        
+        public ResponseEntity<String> FinalizarAgendamento(
+                        @Parameter(description = "id do agendamento", required = true) @PathVariable Long agendamentoId) {
+
+                Agendamento agendamento = agendamentoService.buscarPorId(agendamentoId)
+                                .orElseThrow(() -> new RuntimeException("Agendamento não encontrado"));
+  
+                agendamentoService.atualizarStatusAgendamento(agendamentoId, true);
+
+                
+                return ResponseEntity.status(HttpStatus.CREATED).body("Agendamento "+agendamento.getId()+" finalizado com sucesso");
+        }
+
 }

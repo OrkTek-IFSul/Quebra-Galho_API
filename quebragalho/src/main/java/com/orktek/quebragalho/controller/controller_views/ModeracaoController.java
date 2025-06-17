@@ -3,7 +3,6 @@ package com.orktek.quebragalho.controller.controller_views;
 import com.orktek.quebragalho.dto.PrestadorDTO.AnalisePrestadorDTO;
 import com.orktek.quebragalho.model.Apelo;
 import com.orktek.quebragalho.model.Denuncia;
-import com.orktek.quebragalho.model.Prestador;
 import com.orktek.quebragalho.model.Usuario;
 import com.orktek.quebragalho.service.ApeloService;
 import com.orktek.quebragalho.service.DenunciaService;
