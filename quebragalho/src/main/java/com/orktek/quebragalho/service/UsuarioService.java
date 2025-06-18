@@ -274,6 +274,15 @@ public class UsuarioService {
         });
     }
 
+    public boolean salvarToken(Long usuarioId, String token) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
+
+        usuario.setToken(token);
+        usuarioRepository.save(usuario);
+        return true;
+    }
+
     /**
      * Atualiza a imagem de perfil do usuário
      * 
