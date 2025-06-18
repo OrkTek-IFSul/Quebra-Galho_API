@@ -2,8 +2,6 @@ package com.orktek.quebragalho.controller.controller_views;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -23,6 +21,7 @@ import com.orktek.quebragalho.model.Prestador;
 import com.orktek.quebragalho.model.Servico;
 import com.orktek.quebragalho.model.Usuario;
 import com.orktek.quebragalho.service.AgendamentoService;
+import com.orktek.quebragalho.service.DisponibilidadeService;
 import com.orktek.quebragalho.service.PrestadorService;
 import com.orktek.quebragalho.service.ServicoService;
 import com.orktek.quebragalho.service.UsuarioService;
@@ -34,6 +33,9 @@ public class AgendamentoServicoUsuario {
 
         @Autowired
         private UsuarioService usuarioService;
+
+        @Autowired
+        private DisponibilidadeService disponibilidadeService;
 
         @Autowired
         private ServicoService servicoService;
@@ -61,46 +63,13 @@ public class AgendamentoServicoUsuario {
             }
         )
         @GetMapping("/{servicoId}/horarios-disponiveis")
-        public ResponseEntity<List<String>> listarHorariosDisponiveis(
-                        @PathVariable Long servicoId,
-                        @RequestParam(name = "data") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data) {
-                System.out.println("Recebido data = " + data + " para serviço " + servicoId);
-                Servico servico = servicoService.buscarPorId(servicoId)
-                                .orElseThrow(() -> new RuntimeException("Serviço não encontrado"));
+        public ResponseEntity<List<LocalDateTime>> getDisponibilidade(
+            @PathVariable Long servicoId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data) {
 
-                int duracaoMinutos = servico.getDuracaoMinutos();
-                Prestador prestador = servico.getPrestador();
-
-                LocalTime horaInicio = prestador.getDataHoraInicio().toLocalTime();
-                LocalTime horaFim = prestador.getDataHoraFim().toLocalTime();
-
-                LocalDateTime inicioDia = LocalDateTime.of(data, horaInicio);
-                LocalDateTime fimDia = LocalDateTime.of(data, horaFim);
-
-                List<Agendamento> agendamentos = agendamentoService.listarPorPrestadorEntre(
-                                prestador.getId(), inicioDia, fimDia);
-
-                List<String> horariosDisponiveis = new ArrayList<>();
-                for (LocalDateTime cursor = inicioDia; !cursor.plusMinutes(duracaoMinutos)
-                                .isAfter(fimDia); cursor = cursor.plusMinutes(30)) {
-
-                        final LocalDateTime horarioAtual = cursor;
-                        final LocalDateTime fimHorarioProposto = horarioAtual.plusMinutes(duracaoMinutos);
-
-                        boolean conflita = agendamentos.stream().anyMatch(ag -> {
-                                LocalDateTime inicioAg = ag.getDataHora();
-                                LocalDateTime fimAg = inicioAg.plusMinutes(ag.getServico().getDuracaoMinutos());
-                                return !fimHorarioProposto.isBefore(inicioAg)
-                                                && !horarioAtual.isAfter(fimAg.minusMinutes(1));
-                        });
-
-                        if (!conflita) {
-                                horariosDisponiveis.add(horarioAtual.toString());
-                        }
-                }
-
-                return ResponseEntity.ok(horariosDisponiveis);
-        }
+        List<LocalDateTime> horarios = disponibilidadeService.getHorariosDisponiveis(servicoId, data);
+        return ResponseEntity.ok(horarios);
+    }
 
         @PostMapping
         @Operation(summary = "Cadastrar Agendamento", description = "Cadastra um novo Agendamento e retorna os dados do agendamento")

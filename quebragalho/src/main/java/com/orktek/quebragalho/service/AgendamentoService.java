@@ -95,10 +95,6 @@ public class AgendamentoService {
         return retorno;
     }
 
-    public List<Agendamento> listarPorPrestadorEntre(Long idPrestador, LocalDateTime inicio, LocalDateTime fim) {
-        return agendamentoRepository.listarPorPrestadorEntre(idPrestador, inicio, fim);
-    }
-
     /**
      * Lista agendamentos de um usuário específico
      * 
