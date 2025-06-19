@@ -48,7 +48,8 @@ public class CriarAlterarServicoController {
                 servico.setDescricao(servicoDTO.getDescricao());
                 servico.setPreco(servicoDTO.getPreco());
                 servico.setAtivo(true);
-
+                servico.setDuracaoMinutos(servicoDTO.getDuracaoMinutos());
+                
                 // Adiciona as tags do DTO em uma lista para o serviço
                 List<Tags> tagsSalvar = new ArrayList<>();
                 if (servicoDTO.getTags() != null) {
