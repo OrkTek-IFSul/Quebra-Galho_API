@@ -7,14 +7,14 @@ import lombok.Data;
 @Data
 public class CriarDenunciaDTO {
 
-    @Schema(description = "Tipo da denúncia", example = "Abuso")
+    @Schema(description = "Tipo do conteudo denunciado", example = "Conta, Resposta, Avaliação")
     private String tipo;
 
     @Schema(description = "Motivo da denúncia", example = "Conteúdo impróprio")
     private String motivo;
 
-    @Schema(description = "Identificador da avaliação ou resposta relacionada à denúncia", example = "10")
-    private Long idComentario;
+    @Schema(description = "Identificador do conteúdo denunciado", example = "10")
+    private Long idConteudoDenunciado;
 
     @Schema(description = "Id do usuário que realizou a denúncia" , example = "5")
     private Long denunciante;

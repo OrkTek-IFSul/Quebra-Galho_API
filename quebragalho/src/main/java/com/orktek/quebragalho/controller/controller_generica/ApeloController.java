@@ -1,32 +1,32 @@
-package com.orktek.quebragalho.controller.controller_generica;
+// package com.orktek.quebragalho.controller.controller_generica;
 
-// import java.util.List;
-// import java.util.stream.Collectors;
+// // import java.util.List;
+// // import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+// import org.springframework.beans.factory.annotation.Autowired;
+// import org.springframework.http.ResponseEntity;
+// import org.springframework.web.bind.annotation.*;
 
-// import com.orktek.quebragalho.dto.ApeloDTO;
-import com.orktek.quebragalho.model.Apelo;
-import com.orktek.quebragalho.service.ApeloService;
+// // import com.orktek.quebragalho.dto.ApeloDTO;
+// import com.orktek.quebragalho.model.Apelo;
+// import com.orktek.quebragalho.service.ApeloService;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
+// import io.swagger.v3.oas.annotations.Operation;
+// import io.swagger.v3.oas.annotations.Parameter;
+// import io.swagger.v3.oas.annotations.tags.Tag;
+// import io.swagger.v3.oas.annotations.responses.ApiResponse;
+// import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
-/**
- * Controller para gerenciamento de apelos a denúncias
- */
-@RestController
-@RequestMapping("/api/apelos")
+// /**
+//  * Controller para gerenciamento de apelos a denúncias
+//  */
+// @RestController
+// @RequestMapping("/api/apelos")
 // @Tag(name = "Apelos", description = "Gerenciamento de apelos a denúncias")
-public class ApeloController {
+// public class ApeloController {
 
-    @Autowired
-    private ApeloService apeloService;
+//     @Autowired
+//     private ApeloService apeloService;
 
     /**
      * Cria um novo apelo para uma denúncia
@@ -68,19 +68,19 @@ public class ApeloController {
      * PUT /api/apelos/{id}/resolver
      */
     //@Operation(summary = "Resolve um apelo", description = "Aceita ou rejeita um apelo com base no ID")
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Apelo resolvido com sucesso"),
-        @ApiResponse(responseCode = "404", description = "Apelo não encontrado")
-    })
-    @PutMapping("/{id}/resolver")
-    public ResponseEntity<Apelo> resolverApelo(
-            @Parameter(description = "ID do apelo a ser resolvido", required = true)
-            @PathVariable Long id,
-            @Parameter(description = "Indica se o apelo será aceito (true) ou rejeitado (false)", required = true)
-            @RequestParam boolean aceito) {
-        Apelo apelo = apeloService.atualizarStatusApelo(id, aceito);
-        return ResponseEntity.ok(apelo); // 200 OK
-    }
+    // @ApiResponses({
+    //     @ApiResponse(responseCode = "200", description = "Apelo resolvido com sucesso"),
+    //     @ApiResponse(responseCode = "404", description = "Apelo não encontrado")
+    // })
+    // @PutMapping("/{id}/resolver")
+    // public ResponseEntity<Apelo> resolverApelo(
+    //         @Parameter(description = "ID do apelo a ser resolvido", required = true)
+    //         @PathVariable Long id,
+    //         @Parameter(description = "Indica se o apelo será aceito (true) ou rejeitado (false)", required = true)
+    //         @RequestParam boolean aceito) {
+    //     Apelo apelo = apeloService.atualizarStatusApelo(id, aceito);
+    //     return ResponseEntity.ok(apelo); // 200 OK
+    // }
 
     // /**
     //  * Busca apelo por ID
@@ -100,4 +100,4 @@ public class ApeloController {
     //             .map(ResponseEntity::ok) // 200 OK se encontrado
     //             .orElse(ResponseEntity.notFound().build()); // 404 Not Found
     // }
-}
+// }

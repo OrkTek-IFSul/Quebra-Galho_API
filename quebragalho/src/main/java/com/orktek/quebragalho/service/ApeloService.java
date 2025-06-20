@@ -55,6 +55,16 @@ public class ApeloService {
         return carregarApeloDTO;
     }
 
+
+    /**
+     * Lista todos os apelos nao resolvidas
+     * 
+     * @return Lista de Apelos
+     */
+    public List<Apelo> listarTodosNaoAceitos() {
+        return apeloRepository.findByStatusIsNull();
+    }
+
     /**
      * Busca um apelo pelo ID
      * 

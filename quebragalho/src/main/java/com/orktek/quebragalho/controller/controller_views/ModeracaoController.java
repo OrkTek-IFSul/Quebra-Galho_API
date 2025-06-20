@@ -1,14 +1,18 @@
 package com.orktek.quebragalho.controller.controller_views;
 
+import com.orktek.quebragalho.dto.ApeloDTO.CarregarApeloDTO;
+import com.orktek.quebragalho.dto.DenunciaDTO.AnalisarDenunciaDTO;
 import com.orktek.quebragalho.dto.PrestadorDTO.AnalisePrestadorDTO;
 import com.orktek.quebragalho.model.Apelo;
 import com.orktek.quebragalho.model.Denuncia;
+import com.orktek.quebragalho.model.Prestador;
 import com.orktek.quebragalho.model.Usuario;
 import com.orktek.quebragalho.service.ApeloService;
 import com.orktek.quebragalho.service.DenunciaService;
 import com.orktek.quebragalho.service.PrestadorService;
 import com.orktek.quebragalho.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;
@@ -56,6 +60,25 @@ public class ModeracaoController {
         return ResponseEntity.ok(retorno);
     }
 
+    @GetMapping("analisarDenuncias")
+    @Operation(summary = "Busca lista de denuncias não analisadas", description = "Busca lista de denuncias não analisadas")
+    public ResponseEntity<List<AnalisarDenunciaDTO>> listarDenuncias() {
+
+        List<AnalisarDenunciaDTO> denunciasNaoAceitas = denunciaService.listarTodosNaoAceitos().stream()
+                .map(AnalisarDenunciaDTO::fromEntity).collect(Collectors.toList());
+
+        return ResponseEntity.ok(denunciasNaoAceitas);
+    }
+
+    @GetMapping("analisarDenuncias/{idDenuncia}")
+    @Operation(summary = "Busca uma denúncia não analisada", description = "Busca uma denúncia não analisada pelo ID")
+    public ResponseEntity<AnalisarDenunciaDTO> listarDenuncia(@PathVariable Long idDenuncia) {
+        Denuncia denuncia = denunciaService.buscarPorId(idDenuncia)
+                .orElseThrow(() -> new RuntimeException("Denúncia não encontrada"));
+        AnalisarDenunciaDTO denunciaDTO = AnalisarDenunciaDTO.fromEntity(denuncia);
+        return ResponseEntity.ok(denunciaDTO);
+    }
+
     @PutMapping("aceitarDenuncia/{idDenuncia}")
     @Operation(summary = "Aceitar uma denúncia", description = "Aceita uma denúncia e ")
     public ResponseEntity<String> AceitarDenuncia(@PathVariable Long idDenuncia) {
@@ -88,6 +111,28 @@ public class ModeracaoController {
         denunciaService.atualizarStatusDenuncia(idDenuncia, false);
 
         return ResponseEntity.ok("Denuncia recusada com sucesso");
+    }
+
+    @GetMapping("analisarApelos")
+    @Operation(summary = "Busca lista de apelos não analisados", description = "Busca lista de apelos não analisados")
+    public ResponseEntity<List<CarregarApeloDTO>> listarApelos() {
+
+        List<CarregarApeloDTO> apelosNaoAceitos = apeloService.listarTodosNaoAceitos().stream()
+                .map(CarregarApeloDTO::fromEntity).collect(Collectors.toList());
+
+        return ResponseEntity.ok(apelosNaoAceitos);
+    }
+
+    @GetMapping("analisarApelos/{idApelo}")
+    @Operation(summary = "Busca apelo não analisados", description = "Busca de apelo não analisado")
+    public ResponseEntity<CarregarApeloDTO> listarApelo(
+            @Parameter(description = "ID do apelo", example = "1") @PathVariable Long idApelo) {
+
+        Apelo apelo = apeloService.buscarPorId(idApelo)
+                .orElseThrow(() -> new RuntimeException("Apelo não encontrado"));
+        CarregarApeloDTO apeloDTO = CarregarApeloDTO.fromEntity(apelo);
+
+        return ResponseEntity.ok(apeloDTO);
     }
 
     @PutMapping("aceitarApelo/{idApelo}")
@@ -125,6 +170,15 @@ public class ModeracaoController {
                 .map(AnalisePrestadorDTO::fromEntity).collect(Collectors.toList());
 
         return ResponseEntity.ok(prestadoresNaoAceitos);
+    }
+
+    @GetMapping("analisarPrestador/{idPrestador}")
+    @Operation(summary = "Busca um prestador não analisado", description = "Busca um prestador não analisado pelo ID")
+    public ResponseEntity<AnalisePrestadorDTO> listarPrestador(@PathVariable Long idPrestador) {
+        Prestador prestador = prestadorService.buscarPorId(idPrestador)
+                .orElseThrow(() -> new RuntimeException("Prestador não encontrado"));
+        AnalisePrestadorDTO prestadorDTO = AnalisePrestadorDTO.fromEntity(prestador);
+        return ResponseEntity.ok(prestadorDTO);
     }
 
     @PutMapping("analisarPrestador/recusarPrestador/{idPrestador}")

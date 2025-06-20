@@ -67,6 +67,19 @@ public class AvaliacoesServicoController {
                 return ResponseEntity.ok(response);
         }
 
+        @GetMapping("/resposta/{idResposta}")
+        @Operation(summary = "Carrega uma resposta", description = "Carrega uma resposta")
+        public ResponseEntity<CarregarRespostaDTO> ListarResposta(
+                        @Parameter(description = "Id da resposta") @PathVariable Long idResposta) {
+
+                CarregarRespostaDTO response = respostaService
+                                .buscarPorId(idResposta)
+                                .map(CarregarRespostaDTO::fromEntity)
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+                return ResponseEntity.ok(response);
+        }
+
         @PostMapping("/{avaliacaoId}")
         @Operation(summary = "Responde uma avaliacao(SÓ O PRESTADOR PODE RESPONDER)", description = "Permite que o usuário responda uma avaliacao pelo seu ID.")
         @ApiResponses(value = {

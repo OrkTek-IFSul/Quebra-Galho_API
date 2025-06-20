@@ -42,7 +42,7 @@ public class DenunciaService {
         Denuncia denuncia = new Denuncia();
         denuncia.setTipo(denunciaDTO.getTipo());
         denuncia.setMotivo(denunciaDTO.getMotivo());
-        denuncia.setIdComentario(denunciaDTO.getIdComentario());
+        denuncia.setIdComentario(denunciaDTO.getIdConteudoDenunciado());
         denuncia.setDenunciante(denunciante);
         denuncia.setDenunciado(denunciado);
         denuncia.setStatus(null); // Status inicial como não resolvido
@@ -59,6 +59,16 @@ public class DenunciaService {
      */
     public List<Denuncia> listarTodas() {
         return denunciaRepository.findAll();
+    }
+
+
+    /**
+     * Lista todos as denuncias nao resolvidas
+     * 
+     * @return Lista de Denuncia
+     */
+    public List<Denuncia> listarTodosNaoAceitos() {
+        return denunciaRepository.findByStatusIsNull();
     }
 
     /**

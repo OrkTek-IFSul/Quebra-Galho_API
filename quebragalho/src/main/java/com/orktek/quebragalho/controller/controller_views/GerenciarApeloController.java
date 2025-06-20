@@ -10,28 +10,29 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.orktek.quebragalho.dto.DenunciaDTO.CarregarDenunciaDTO;
-import com.orktek.quebragalho.dto.DenunciaDTO.CriarDenunciaDTO;
-import com.orktek.quebragalho.service.DenunciaService;
+import com.orktek.quebragalho.dto.ApeloDTO.CarregarApeloDTO;
+import com.orktek.quebragalho.dto.ApeloDTO.CriarApeloDTO;
+import com.orktek.quebragalho.service.ApeloService;
 
 @RestController
-@RequestMapping("/api/denuncia")
+@RequestMapping("/api/apelo")
 @Tag(name = "Operações relacionadas a fazer denúncias", description = "Operações relacionadas a fazer denúncias")
-public class CriarDenunciasController {
+public class GerenciarApeloController {
 
         @Autowired
-        private DenunciaService denunciaService;
+        private ApeloService apeloService;
 
         @PostMapping
-        @Operation(summary = "Criar denuncia", description = "Cria uma nova denúncia")
+        @Operation(summary = "Criar apelo", description = "Cria um novo apelo para uma denúncia")
         @ApiResponses(value = {
                         @ApiResponse(responseCode = "201", description = "Denuncia feita com sucesso"),
                         @ApiResponse(responseCode = "409", description = "Falha ao criar a denuncia")
         })
-        public ResponseEntity<CarregarDenunciaDTO> CriarDenuncia(
-                        @Parameter(description = "Informações do agendamento", required = true) @RequestBody CriarDenunciaDTO CriarDenunciaDTO) {
-                
-                CarregarDenunciaDTO denunciaRetorno = denunciaService.criarDenuncia(CriarDenunciaDTO);
+        public ResponseEntity<CarregarApeloDTO> CriarApelo(
+                        @Parameter(description = "Informações do apelo", required = true) @RequestBody CriarApeloDTO criarApeloDTO) {
+
+                CarregarApeloDTO denunciaRetorno = apeloService.criarApelo(criarApeloDTO);
+
                 return ResponseEntity.status(HttpStatus.CREATED).body(denunciaRetorno);
         }
 }

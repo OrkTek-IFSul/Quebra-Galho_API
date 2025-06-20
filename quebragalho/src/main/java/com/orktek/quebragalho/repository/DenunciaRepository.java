@@ -10,4 +10,5 @@ import com.orktek.quebragalho.model.Denuncia;
 @Repository
 public interface DenunciaRepository extends JpaRepository<Denuncia, Long> {
     List<Denuncia> findByStatus(boolean status); // Método para buscar denúncias por status (pendente ou resolvida)
+    List<Denuncia> findByStatusIsNull(); 
 }
