@@ -3,6 +3,7 @@ package com.orktek.quebragalho.controller.controller_views;
 import com.orktek.quebragalho.dto.ApeloDTO.CarregarApeloDTO;
 import com.orktek.quebragalho.dto.DenunciaDTO.AnalisarDenunciaDTO;
 import com.orktek.quebragalho.dto.PrestadorDTO.AnalisePrestadorDTO;
+import com.orktek.quebragalho.dto.UsuarioDTO.UsuarioResponseDTO;
 import com.orktek.quebragalho.model.Apelo;
 import com.orktek.quebragalho.model.Denuncia;
 import com.orktek.quebragalho.model.Prestador;
@@ -21,6 +22,9 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
  * Controlador para moderação
@@ -41,6 +45,19 @@ public class ModeracaoController {
 
     @Autowired
     private ApeloService apeloService;
+
+    @Operation(summary = "Buscar usuários por nome e/ou status de moderador", description = "Retorna uma lista paginada de usuários com base nos filtros fornecidos.")
+    @GetMapping("/listarUsuarios") 
+    public ResponseEntity<Page<UsuarioResponseDTO>> buscarUsuarios(
+            @RequestParam(required = false) String nome,
+            @RequestParam(required = false) Boolean isModerador,
+            Pageable pageable) {
+
+        Page<UsuarioResponseDTO> dtoPage = usuarioService.buscarUsuariosComFiltros(
+                nome, isModerador, pageable);
+
+        return ResponseEntity.ok(dtoPage);
+    }
 
     @PutMapping("tornarModerador/{idUsuario}")
     @Operation(summary = "Tornar um usuario moderador", description = "Dar a um usuario o status de moderador")

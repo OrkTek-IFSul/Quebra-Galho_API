@@ -18,8 +18,12 @@ import org.springframework.web.server.ResponseStatusException;
 import com.orktek.quebragalho.dto.UsuarioDTO.AtualizarUsuarioDTO;
 import com.orktek.quebragalho.dto.UsuarioDTO.CriarUsuarioDTO;
 import com.orktek.quebragalho.dto.UsuarioDTO.UsuarioGenericoDTO;
+import com.orktek.quebragalho.dto.UsuarioDTO.UsuarioResponseDTO;
 import com.orktek.quebragalho.model.Usuario;
 import com.orktek.quebragalho.repository.UsuarioRepository;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import jakarta.transaction.Transactional;
 
@@ -312,6 +316,23 @@ public class UsuarioService {
         } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Erro ao atualizar imagem de perfil", e);
         }
+    }
+
+    public Page<UsuarioResponseDTO> buscarUsuariosComFiltros(String nome, Boolean isModerador, Pageable pageable) {
+
+        // Processa o nome para remover espaços e converter para minúsculas, igual você
+        // já faz.
+        String nomeProcessado = (nome != null && !nome.trim().isEmpty()) ? nome.trim().toLowerCase() : null;
+
+        // Chama o novo método do repositório
+        Page<Usuario> resultado = usuarioRepository.buscarPorNomeEModerador(
+                nomeProcessado, isModerador, pageable);
+
+        // Mapeia o resultado para o DTO de resposta, para não expor a senha
+        return resultado.map(usuario -> {
+            UsuarioResponseDTO dto = UsuarioResponseDTO.fromEntity(usuario);
+            return dto;
+        });
     }
 
     /**

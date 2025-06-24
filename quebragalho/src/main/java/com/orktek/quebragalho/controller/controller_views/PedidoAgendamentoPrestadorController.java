@@ -1,13 +1,24 @@
 package com.orktek.quebragalho.controller.controller_views;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.SetOptions;
+import com.google.firebase.cloud.FirestoreClient;
+
+import com.google.cloud.firestore.DocumentReference;
+import com.google.cloud.firestore.FieldValue;
 import com.orktek.quebragalho.dto.AgendamentoDTO.PedidoAgendamentoServicoDTO;
 import com.orktek.quebragalho.model.Agendamento;
+import com.orktek.quebragalho.model.Usuario;
 import com.orktek.quebragalho.service.AgendamentoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -58,6 +69,44 @@ public class PedidoAgendamentoPrestadorController {
         public ResponseEntity<PedidoAgendamentoServicoDTO> aceitarPedido(
                         @Parameter @PathVariable Long idAgendamento) {
                 Agendamento agendamentoNovo = agendamentoService.atualizarStatusAceitoAgendamento(idAgendamento, true);
+
+                // 2. Obter os participantes do chat
+                Usuario cliente = agendamentoNovo.getUsuario();
+                Usuario prestadorUsuario = agendamentoNovo.getServico().getPrestador().getUsuario(); 
+
+                // 3. O ID do chat será o próprio ID do agendamento
+                String chatId = agendamentoNovo.getId().toString();
+
+                // 4. Criar o documento do chat no Firestore
+                try {
+                        Firestore db = FirestoreClient.getFirestore();
+                        DocumentReference chatRef = db.collection("chats").document(chatId);
+
+                        // 5. Preparar os dados para salvar no documento do chat
+                        Map<String, Object> chatData = new HashMap<>();
+                        chatData.put("agendamentoId", agendamentoNovo.getId());
+                        chatData.put("nomeServico", agendamentoNovo.getServico().getNome());
+                        chatData.put("participants",
+                                        Arrays.asList(cliente.getId().toString(), prestadorUsuario.getId().toString()));
+                        // Adicionar nomes e fotos para facilitar a exibição na lista de chats no
+                        // Flutter
+                        chatData.put("clienteNome", cliente.getNome());
+                        chatData.put("clienteFotoUrl", cliente.getImgPerfil());
+                        chatData.put("prestadorNome", prestadorUsuario.getNome());
+                        chatData.put("prestadorFotoUrl", prestadorUsuario.getImgPerfil());
+                        chatData.put("lastMessage", "Chat iniciado. Dê um olá!"); // Mensagem inicial opcional
+                        chatData.put("lastMessageTimestamp", FieldValue.serverTimestamp());
+
+                        // Escreve os dados no Firestore. Se o documento já existir, ele mescla os
+                        // dados.
+                        chatRef.set(chatData, SetOptions.merge());
+
+                } catch (Exception e) {
+                        // Lidar com possíveis erros de conexão com o Firebase
+                        e.printStackTrace();
+                        // (Opcional) Considerar uma lógica para tentar novamente mais tarde
+                }
+
                 return ResponseEntity.ok(PedidoAgendamentoServicoDTO.fromEntity(agendamentoNovo));
         }
 
