@@ -60,6 +60,10 @@ public class DenunciaService {
     public List<Denuncia> listarTodas() {
         return denunciaRepository.findAll();
     }
+    
+    public List<Denuncia> listarDenunciasAceitasPorDenunciado(Long denunciadoId) {
+        return denunciaRepository.findByDenunciadoIdAndStatusTrue(denunciadoId);
+    }
 
 
     /**
