@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 
 @RestController
 @RequestMapping("/api/getToken")
-@Tag(name = "Controller do tipo de usuario", description = "Operações relacionadas ao tipo de usuario")
+@Tag(name = "Controller do token do firebase", description = "Operações relacionadas ao token do firebase")
 public class TokenController {
 
     @Autowired

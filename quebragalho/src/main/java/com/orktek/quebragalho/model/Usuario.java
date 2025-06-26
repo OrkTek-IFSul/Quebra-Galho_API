@@ -58,7 +58,7 @@ public class Usuario implements UserDetails {
     @Schema(description = "Path da imagem de perfil do usuário", example = "/img/usuario123.jpeg")
     private String imgPerfil;
 
-    @Column(length = 100)
+    @Column(length = 250)
     @Schema(description = "Token de autenticação do usuário", example = "abc123token")
     private String token;
 
