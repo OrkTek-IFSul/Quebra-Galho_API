@@ -20,6 +20,8 @@ import com.orktek.quebragalho.dto.AgendamentoDTO.PedidoAgendamentoServicoDTO;
 import com.orktek.quebragalho.model.Agendamento;
 import com.orktek.quebragalho.model.Usuario;
 import com.orktek.quebragalho.service.AgendamentoService;
+import com.orktek.quebragalho.service.FirebaseMessagingService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -32,6 +34,9 @@ public class PedidoAgendamentoPrestadorController {
 
         @Autowired
         AgendamentoService agendamentoService = new AgendamentoService();
+
+        @Autowired
+        private FirebaseMessagingService firebaseService;
 
         @Operation(summary = "Lista com os pedidos de serviços do prestador", description = "Retorna todos os agendamentos pendentes feitos à um prestador", responses = {
                         @ApiResponse(responseCode = "200", description = "Lista de agendamentos retornada com sucesso"),
@@ -72,7 +77,7 @@ public class PedidoAgendamentoPrestadorController {
 
                 // 2. Obter os participantes do chat
                 Usuario cliente = agendamentoNovo.getUsuario();
-                Usuario prestadorUsuario = agendamentoNovo.getServico().getPrestador().getUsuario(); 
+                Usuario prestadorUsuario = agendamentoNovo.getServico().getPrestador().getUsuario();
 
                 // 3. O ID do chat será o próprio ID do agendamento
                 String chatId = agendamentoNovo.getId().toString();
@@ -106,6 +111,19 @@ public class PedidoAgendamentoPrestadorController {
                         e.printStackTrace();
                         // (Opcional) Considerar uma lógica para tentar novamente mais tarde
                 }
+
+                // Envia a notificação para o usuario que solicitou o agendamento
+                Usuario clienteNotificado = agendamentoNovo.getUsuario(); // O destinatário da notificação
+                String titulo = "Pedido de Agendamento Aceito!";
+                String corpo = agendamentoNovo.getServico().getPrestador().getUsuario().getNome() + " aceitou seu pedido de agendamento do serviço '"
+                                + agendamentoNovo.getServico().getNome()
+                                + "' para o dia " + agendamentoNovo.getDataHora().toLocalDate() + " às "
+                                + agendamentoNovo.getDataHora().toLocalTime() + ".";
+                String link = "/api/usuario/solicitacoes/agendamento/" + agendamentoNovo.getId(); // Link para a tela
+                                                                                            // específica no app
+
+                // Chama o método genérico que faz tudo
+                firebaseService.enviarNotificacaoCompleta(clienteNotificado, titulo, corpo, link);
 
                 return ResponseEntity.ok(PedidoAgendamentoServicoDTO.fromEntity(agendamentoNovo));
         }

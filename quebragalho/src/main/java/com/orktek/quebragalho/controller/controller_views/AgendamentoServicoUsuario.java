@@ -2,6 +2,7 @@ package com.orktek.quebragalho.controller.controller_views;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -22,6 +23,7 @@ import com.orktek.quebragalho.model.Servico;
 import com.orktek.quebragalho.model.Usuario;
 import com.orktek.quebragalho.service.AgendamentoService;
 import com.orktek.quebragalho.service.DisponibilidadeService;
+import com.orktek.quebragalho.service.FirebaseMessagingService;
 import com.orktek.quebragalho.service.PrestadorService;
 import com.orktek.quebragalho.service.ServicoService;
 import com.orktek.quebragalho.service.UsuarioService;
@@ -36,6 +38,9 @@ public class AgendamentoServicoUsuario {
 
         @Autowired
         private DisponibilidadeService disponibilidadeService;
+
+        @Autowired
+        private FirebaseMessagingService firebaseService;
 
         @Autowired
         private ServicoService servicoService;
@@ -80,12 +85,8 @@ public class AgendamentoServicoUsuario {
                                         .body(null);
                 }
 
-                agendamentoService.criarAgendamento(criarAgendamentoDTO);
+                Agendamento agendamento = agendamentoService.criarAgendamento(criarAgendamentoDTO);
 
-                Agendamento agendamento = agendamentoService.buscarPorId(criarAgendamentoDTO.getId_usuario())
-                                .orElseThrow(() -> new RuntimeException("Agendamento não encontrado"));
-
-                
                 AgendamentoRetornoDTO agendamentoRetornoDTO = new AgendamentoRetornoDTO();
                 agendamentoRetornoDTO.setUsuario(usuario.getNome());
                 agendamentoRetornoDTO.setPrestador(prestador.getUsuario().getNome());
@@ -93,6 +94,19 @@ public class AgendamentoServicoUsuario {
                 agendamentoRetornoDTO.setDescricao_servico(servico.getDescricao());
                 agendamentoRetornoDTO.setPreco_servico(servico.getPreco());
                 agendamentoRetornoDTO.setHorario(agendamento.getDataHora());
+
+                // Envia a notificação para o prestador
+                Usuario cliente = agendamento.getServico().getPrestador().getUsuario(); // O destinatário da notificação
+                String titulo = "Pedido de Agendamento";
+                String corpo = agendamento.getUsuario().getNome() + " realizou um pedido de agendamento do serviço '"
+                                + agendamento.getServico().getNome()
+                                + "' para o dia " + agendamento.getDataHora().toLocalDate() + " às "
+                                + agendamento.getDataHora().toLocalTime() + ".";
+                String link = "/api/prestador/pedidoservico/pedido/" + agendamento.getId(); // Link para a tela
+                                                                                            // específica no app
+
+                // Chama o método genérico que faz tudo
+                firebaseService.enviarNotificacaoCompleta(cliente, titulo, corpo, link);
 
                 System.out.println("TESTE TESTE" + agendamentoRetornoDTO.toString());
                 return ResponseEntity.status(HttpStatus.CREATED).body(agendamentoRetornoDTO);
@@ -113,6 +127,22 @@ public class AgendamentoServicoUsuario {
                                         .body("Não é possível finalizar o agendamento antes do horário agendado.");
                 } else {
                         agendamentoService.atualizarStatusAgendamento(agendamentoId, true);
+
+                        // Envia a notificação para o prestador
+                        Usuario cliente = agendamento.getServico().getPrestador().getUsuario(); // O destinatário da
+                                                                                                // notificação
+                        String titulo = "Pedido Finalizado pelo Cliente";
+                        String corpo = agendamento.getUsuario().getNome()
+                                        + " finalizou o agendamento do serviço '"
+                                        + agendamento.getServico().getNome()
+                                        + "' às " + agendamento.getDataHora().toLocalDate()
+                                        + LocalTime.now() + ". Fique atento para a avaliação do serviço prestado.";
+                        String link = "/api/prestador/pedidoservico/pedido/" + agendamento.getId(); // Link para a tela
+                                                                                                    // específica no app
+                        // Chama o método genérico que faz tudo
+                        firebaseService.enviarNotificacaoCompleta(cliente, titulo, corpo, link);
+
+                        // Retorna a resposta de sucesso
                         return ResponseEntity.status(HttpStatus.CREATED)
                                         .body("Agendamento " + agendamento.getId() + " finalizado com sucesso");
                 }

@@ -128,7 +128,7 @@ public class AgendamentoService {
      *                                 requisição
      */
     @Transactional
-    public CriarAgendamentoDTO criarAgendamento(CriarAgendamentoDTO agendamentoDTO) {
+    public Agendamento criarAgendamento(CriarAgendamentoDTO agendamentoDTO) {
         try {
             // Validações básicas do DTO
             if (agendamentoDTO.getHorario() == null) {
@@ -156,7 +156,7 @@ public class AgendamentoService {
 
             agendamentoRepository.save(agendamento);
 
-            return agendamentoDTO;
+            return agendamento;
 
         } catch (DataIntegrityViolationException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,

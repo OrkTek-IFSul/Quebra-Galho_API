@@ -1,7 +1,5 @@
-package com.orktek.quebragalho.controller.controller_generica;
+package com.orktek.quebragalho.controller.controller_views;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -23,9 +21,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -50,11 +46,11 @@ public class PortfolioController {
                         @ApiResponse(responseCode = "400", description = "Erro na requisição"),
                         @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
         })
-        public ResponseEntity<Portfolio> adicionarItem(
+        public ResponseEntity<String> adicionarItem(
                         @Parameter(description = "ID do prestador", required = true) @PathVariable Long prestadorId,
                         @Parameter(description = "Arquivo a ser adicionado ao portfólio", required = true) @RequestParam("file") MultipartFile arquivo) {
                 Portfolio item = portfolioService.adicionarAoPortfolio(arquivo, prestadorId);
-                return ResponseEntity.status(201).body(item);
+                return ResponseEntity.status(201).body(item.getImgPortfolioPath());
         }
 
         /**
@@ -82,7 +78,7 @@ public class PortfolioController {
          * Obtém a imagem de um item do portfólio
          * GET /api/portfolio/{id}/imagem
          */
-        @GetMapping("/{id}/imagem")
+        @GetMapping("/{idImagem}/imagem")
         //@Operation(summary = "Obtém imagem do portfólio", description = "Retorna a imagem de um item do portfólio")
         @ApiResponses({
                         @ApiResponse(responseCode = "200", description = "Imagem retornada com sucesso", content = @Content(mediaType = "image/*")),
@@ -90,11 +86,11 @@ public class PortfolioController {
                         @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
         })
         public ResponseEntity<byte[]> obterImagem(
-                        @Parameter(description = "ID do item do portfólio", required = true) @PathVariable Long id) {
+                        @Parameter(description = "ID do item do portfólio", required = true) @PathVariable Long idImagem) {
 
                 try {
-                        byte[] imageBytes = portfolioService.obterBytesImagem(id);
-                        Path imagePath = portfolioService.getFilePath(id);
+                        byte[] imageBytes = portfolioService.obterBytesImagem(idImagem);
+                        Path imagePath = portfolioService.getFilePath(idImagem);
                         String mimeType = Files.probeContentType(imagePath);
 
                         return ResponseEntity.ok()
@@ -111,7 +107,7 @@ public class PortfolioController {
          * Remove item do portfólio
          * DELETE /api/portfolio/{id}
          */
-        @DeleteMapping("/{id}")
+        @DeleteMapping("/{idImagem}")
         //@Operation(summary = "Remove item do portfólio", description = "Remove um item do portfólio pelo ID")
         @ApiResponses({
                         @ApiResponse(responseCode = "204", description = "Item removido com sucesso"),
@@ -119,52 +115,8 @@ public class PortfolioController {
                         @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
         })
         public ResponseEntity<Void> removerItem(
-                        @Parameter(description = "ID do item a ser removido", required = true) @PathVariable Long id) {
-                portfolioService.removerDoPortfolio(id);
+                        @Parameter(description = "ID do item a ser removido", required = true) @PathVariable Long idImagem) {
+                portfolioService.removerDoPortfolio(idImagem);
                 return ResponseEntity.noContent().build();
         }
-
-        /**
-         * Obtém a imagem de um item do portfólio
-         * GET /api/portfolio/imagem/{id}
-         */
-        @GetMapping("/imagem/{id}")
-        //@Operation(summary = "Obtém imagem do portfólio", description = "Retorna a imagem de um item específico do portfólio")
-        @ApiResponses({
-                        @ApiResponse(responseCode = "200", description = "Imagem retornada com sucesso"),
-                        @ApiResponse(responseCode = "404", description = "Item não encontrado"),
-                        @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
-        })
-        public ResponseEntity<byte[]> obterImagemPortfolio(
-                        @Parameter(description = "ID do item do portfólio", required = true) @PathVariable Long id) {
-
-                // 1. Obter o caminho da imagem ou os bytes do serviço
-                Optional<Portfolio> portfolioItem = portfolioService.buscarPorId(id);
-                if (portfolioItem.isEmpty()) {
-                        return ResponseEntity.notFound().build();
-                }
-                Path imagePath = Paths.get(portfolioItem.get().getImgPortfolioPath());
-
-                // 2. Ler os bytes da imagem
-                byte[] imageBytes;
-                try {
-                        imageBytes = Files.readAllBytes(imagePath);
-                } catch (IOException e) {
-                        return ResponseEntity.notFound().build();
-                }
-
-                // 3. Determinar o tipo de conteúdo
-                String mimeType;
-                try {
-                        mimeType = Files.probeContentType(imagePath);
-                } catch (IOException e) {
-                        mimeType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
-                }
-
-                // 4. Retornar a imagem
-                return ResponseEntity.ok()
-                                .contentType(MediaType.parseMediaType(mimeType))
-                                .body(imageBytes);
-        }
-
 }

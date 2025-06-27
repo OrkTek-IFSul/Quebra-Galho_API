@@ -10,6 +10,7 @@ import com.orktek.quebragalho.model.Prestador;
 import com.orktek.quebragalho.model.Usuario;
 import com.orktek.quebragalho.service.ApeloService;
 import com.orktek.quebragalho.service.DenunciaService;
+import com.orktek.quebragalho.service.FirebaseMessagingService;
 import com.orktek.quebragalho.service.PrestadorService;
 import com.orktek.quebragalho.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -46,8 +47,11 @@ public class ModeracaoController {
     @Autowired
     private ApeloService apeloService;
 
+    @Autowired
+    private FirebaseMessagingService firebaseService;
+
     @Operation(summary = "Buscar usuários por nome e/ou status de moderador", description = "Retorna uma lista paginada de usuários com base nos filtros fornecidos.")
-    @GetMapping("/listarUsuarios") 
+    @GetMapping("/listarUsuarios")
     public ResponseEntity<Page<UsuarioResponseDTO>> buscarUsuarios(
             @RequestParam(required = false) String nome,
             @RequestParam(required = false) Boolean isModerador,
@@ -65,6 +69,17 @@ public class ModeracaoController {
 
         String retorno = usuarioService.tornarModerador(idUsuario);
 
+        // Envia a notificação para o prestador
+        Usuario cliente = usuarioService.buscarPorId(idUsuario)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado")); // O destinatário da
+                                                                                    // notificação
+        String titulo = "Permissão de Moderador Concedida!";
+        String corpo = "Você agora é um moderador do Quebra-Galho! Você pode analisar denúncias e apelos de usuários e analisar pedidos de cadastro de prestador.";
+        String link = ""; // Link para a tela
+                          // específica no app
+        // Chama o método genérico que faz tudo
+        firebaseService.enviarNotificacaoCompleta(cliente, titulo, corpo, link);
+
         return ResponseEntity.ok(retorno);
     }
 
@@ -73,6 +88,17 @@ public class ModeracaoController {
     public ResponseEntity<String> RemoverModerador(@PathVariable Long idUsuario) {
 
         String retorno = usuarioService.removerModerador(idUsuario);
+
+        // Envia a notificação para o prestador
+        Usuario cliente = usuarioService.buscarPorId(idUsuario)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado")); // O destinatário da
+                                                                                    // notificação
+        String titulo = "Permissão de Moderador Removida!";
+        String corpo = "Você deixou de ser moderador do Quebra-Galho! O que você fez para isso acontecer ?.";
+        String link = ""; // Link para a tela
+                          // específica no app
+        // Chama o método genérico que faz tudo
+        firebaseService.enviarNotificacaoCompleta(cliente, titulo, corpo, link);
 
         return ResponseEntity.ok(retorno);
     }
@@ -109,12 +135,34 @@ public class ModeracaoController {
         // Busca o usuário denunciado
         Usuario usuario = denuncia.getDenunciado();
 
+        // Envia a notificação para o prestador
+        Usuario cliente = usuario; // O destinatário da
+                                   // notificação
+        String titulo = "Denúncia feita contra você foi aceita";
+        String corpo = "Um usuario fez uma denúncia contra você e ela foi aceita pela moderação. Você recebeu um strike "
+                +
+                "por isso. Se receber três strikes, será banido do Quebra-Galho. Não esqueça que pode apelar dessa decisão para remover o strike.";
+        String link = ""; // Link para a tela
+                          // específica no app
+        // Chama o método genérico que faz tudo
+        firebaseService.enviarNotificacaoCompleta(cliente, titulo, corpo, link);
+
         // Adiciona um strike ao usuário denunciado
         usuarioService.adicionarStrike(usuario.getId());
 
         // Se usuario possuir 3 strikes é banido c:
         if (usuario.getIsAtivo() == true && usuario.getNumStrike() >= 3) {
-            usuarioService.desativarUsuario(idDenuncia);
+            usuarioService.desativarUsuario(usuario.getId());
+            // Envia a notificação para o prestador
+            Usuario cliente2 = usuario; // O destinatário da
+                                        // notificação
+            String titulo2 = "Você foi banido do Quebra-Galho";
+            String corpo2 = "Como você conseguiu tomar 3 strikes ?";
+            String link2 = ""; // Link para a tela
+                               // específica no app
+            // Chama o método genérico que faz tudo
+            firebaseService.enviarNotificacaoCompleta(cliente2, titulo2, corpo2, link2);
+
         }
 
         return ResponseEntity.ok("Denuncia aceita com sucesso");
@@ -166,6 +214,16 @@ public class ModeracaoController {
         // Remove o strike do usuário
         usuarioService.removerStrike(usuario.getId());
 
+        // Envia a notificação para o prestador
+        Usuario cliente = usuario; // O destinatário da
+                                   // notificação
+        String titulo = "Apelo aceito";
+        String corpo = "Seu apelo foi aceito pela moderação e seu strike foi removido. Você pode continuar usando o Quebra-Galho normalmente.";
+        String link = ""; // Link para a tela
+                          // específica no app
+        // Chama o método genérico que faz tudo
+        firebaseService.enviarNotificacaoCompleta(cliente, titulo, corpo, link);
+
         return ResponseEntity.ok("Apelo aceito com sucesso");
     }
 
@@ -175,6 +233,21 @@ public class ModeracaoController {
 
         // Recusa o apelo
         apeloService.atualizarStatusApelo(idApelo, false);
+
+        // Busca o usuário do apelo
+        Apelo apelo = apeloService.buscarPorId(idApelo)
+                .orElseThrow(() -> new RuntimeException("Apelo não encontrado"));
+        Usuario usuario = apelo.getDenuncia().getDenunciado();
+
+        // Envia a notificação para o prestador
+        Usuario cliente = usuario; // O destinatário da
+                                   // notificação
+        String titulo = "Apelo recusado";
+        String corpo = "Seu apelo foi recusado pela moderação e seu strike foi mantido. Você pode continuar usando o Quebra-Galho, mas cuidado com as denúncias.";
+        String link = ""; // Link para a tela
+                          // específica no app
+        // Chama o método genérico que faz tudo
+        firebaseService.enviarNotificacaoCompleta(cliente, titulo, corpo, link);
 
         return ResponseEntity.ok("Apelo recusado com sucesso");
     }
@@ -204,6 +277,20 @@ public class ModeracaoController {
 
         // Recusa o prestador
         prestadorService.statusAceito(idPrestador, false);
+
+        Prestador prestador = prestadorService.buscarPorId(idPrestador)
+                .orElseThrow(() -> new RuntimeException("Prestador não encontrado"));
+
+        // Envia a notificação para o prestador
+        Usuario cliente = prestador.getUsuario(); // O destinatário da
+        // notificação
+        String titulo = "Cadastro de Prestador Recusado";
+        String corpo = "Seu cadastro como prestador foi recusado pela moderação.";
+        String link = ""; // Link para a tela
+                          // específica no app
+        // Chama o método genérico que faz tudo
+        firebaseService.enviarNotificacaoCompleta(cliente, titulo, corpo, link);
+
         return ResponseEntity.ok("Prestador recusado com sucesso");
 
     }
@@ -214,6 +301,19 @@ public class ModeracaoController {
 
         // Aceita o prestador
         prestadorService.statusAceito(idPrestador, true);
+
+        Prestador prestador = prestadorService.buscarPorId(idPrestador)
+                .orElseThrow(() -> new RuntimeException("Prestador não encontrado"));
+
+        // Envia a notificação para o prestador
+        Usuario cliente = prestador.getUsuario(); // O destinatário da notificação
+        String titulo = "Cadastro de Prestador Aceito!";
+        String corpo = "Seu cadastro como prestador foi aceito pela moderação. Você agora pode oferecer seus serviços no Quebra-Galho.";
+        String link = ""; // Link para a tela
+                          // específica no app
+        // Chama o método genérico que faz tudo
+        firebaseService.enviarNotificacaoCompleta(cliente, titulo, corpo, link);
+
         return ResponseEntity.ok("Prestador aceito com sucesso");
     }
 }
