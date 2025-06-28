@@ -22,7 +22,7 @@ public class Servico {
     @Schema(description = "Nome do serviço", example = "Corte de cabelo")
     private String nome;
     
-    @Column(nullable = false, length = 45)
+    @Column(nullable = false, length = 250)
     @Schema(description = "Descrição do serviço", example = "Corte de cabelo masculino")
     private String descricao;
     

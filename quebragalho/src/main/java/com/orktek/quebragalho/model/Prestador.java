@@ -20,7 +20,7 @@ public class Prestador {
     @Schema(description = "Identificador único do prestador", example = "1")
     private Long id;
     
-    @Column(name = "descricao_prestador", nullable = false, length = 200)
+    @Column(name = "descricao_prestador", nullable = false, length = 250)
     @Schema(description = "Descrição do prestador", example = "Prestador especializado em serviços elétricos")
     private String descricao;
     

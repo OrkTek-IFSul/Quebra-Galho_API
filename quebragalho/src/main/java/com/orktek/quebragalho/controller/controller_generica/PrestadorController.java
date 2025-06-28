@@ -14,16 +14,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.orktek.quebragalho.dto.PrestadorDTO.CriarPrestadorDTO;
-import com.orktek.quebragalho.model.Prestador;
 import com.orktek.quebragalho.service.PrestadorService;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Controller para operações com prestadores de serviço
