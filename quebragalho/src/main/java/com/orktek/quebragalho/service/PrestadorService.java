@@ -112,7 +112,7 @@ public class PrestadorService {
      * @return Lista de Prestador
      */
     public List<Prestador> listarTodos() {
-        return prestadorRepository.findAll();
+        return prestadorRepository.findByAceitoTrue();
     }
 
     /**
