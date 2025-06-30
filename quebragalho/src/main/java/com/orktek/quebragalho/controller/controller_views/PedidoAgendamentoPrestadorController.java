@@ -96,9 +96,9 @@ public class PedidoAgendamentoPrestadorController {
                         // Adicionar nomes e fotos para facilitar a exibição na lista de chats no
                         // Flutter
                         chatData.put("clienteNome", cliente.getNome());
-                        chatData.put("clienteFotoUrl", cliente.getImgPerfil());
+                        chatData.put("clienteFotoUrl", "api/usuarios/"+cliente.getId()+"/imagem");
                         chatData.put("prestadorNome", prestadorUsuario.getNome());
-                        chatData.put("prestadorFotoUrl", prestadorUsuario.getImgPerfil());
+                        chatData.put("prestadorFotoUrl", "api/usuarios/"+prestadorUsuario.getId()+"/imagem");
                         chatData.put("lastMessage", "Chat iniciado. Dê um olá!"); // Mensagem inicial opcional
                         chatData.put("lastMessageTimestamp", FieldValue.serverTimestamp());
 
