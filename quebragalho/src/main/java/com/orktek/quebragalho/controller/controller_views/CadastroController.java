@@ -14,6 +14,7 @@ import com.orktek.quebragalho.dto.PrestadorDTO.CriarPrestadorUsuarioExistenteDTO
 import com.orktek.quebragalho.dto.PrestadorDTO.PrestadorGenericoDTO;
 import com.orktek.quebragalho.dto.UsuarioDTO.CriarUsuarioDTO;
 import com.orktek.quebragalho.dto.UsuarioDTO.UsuarioGenericoDTO;
+import com.orktek.quebragalho.model.Usuario;
 import com.orktek.quebragalho.service.PrestadorService;
 import com.orktek.quebragalho.service.UsuarioService;
 
@@ -106,9 +107,15 @@ public class CadastroController {
                         return ResponseEntity.badRequest().build();
                 }
 
+                Usuario usuario = usuarioService.buscarPorId(idUsuario)
+                                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+                if(usuario.getPrestador() != null) {
+                        return ResponseEntity.status(HttpStatus.CONFLICT).body(null); // Retorna 409 se já for prestador
+                }
+
                 // 2. Processar como antes
-                UsuarioGenericoDTO usuarioCadastrado = UsuarioGenericoDTO.fromEntity(usuarioService.buscarPorId(idUsuario)
-                                .orElseThrow(() -> new RuntimeException("Usuário não encontrado")));
+                UsuarioGenericoDTO usuarioCadastrado = UsuarioGenericoDTO.fromEntity(usuario);
                 
                 PrestadorGenericoDTO prestadorCadastrado = prestadorService.criarPrestador(usuarioCadastrado,
                                 criarPrestadorDTO.getDescricao());

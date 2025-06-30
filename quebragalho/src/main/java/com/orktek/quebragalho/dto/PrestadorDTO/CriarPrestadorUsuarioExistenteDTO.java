@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 @Data
-@Schema(name = "CriarPrestadorDTO", description = "DTO para criação de prestador")
+@Schema(name = "CriarPrestadorUsuarioExistenteDTO", description = "DTO para criação de prestador com usuário existente")
 public class CriarPrestadorUsuarioExistenteDTO {
 
     @Schema(description = "Descrição do prestador", example = "Especialista em encanamento residencial")
