@@ -51,6 +51,9 @@ public class AuthController {
             return ResponseEntity.ok("Usuario Desativado");
         }
         
+        response.put("isAdmin", usuario.getIsAdmin()); 
+        response.put("isModerador", usuario.getIsModerador()); 
+
         // Retorna o token JWT gerado e o ID como resposta para o cliente
         return ResponseEntity.ok((response));
     }
